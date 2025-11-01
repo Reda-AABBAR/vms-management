@@ -1,0 +1,5 @@
+./mysql/.env
+./api/.env
+./vms-management/.env
+./vms-management/node_modules/
+./vms-management/dist/
