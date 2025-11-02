@@ -1,0 +1,17 @@
+<div class="login-wrapper">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+    <h2>Login</h2>
+
+    <label for="email">Email</label>
+    <input id="email" formControlName="email" type="email" />
+    <div *ngIf="form.controls['email'].invalid && form.controls['email'].touched" class="error">Valid email required</div>
+
+    <label for="password">Password</label>
+    <input id="password" formControlName="password" type="password" />
+    <div *ngIf="form.controls['password'].invalid && form.controls['password'].touched" class="error">Password required</div>
+
+  <button type="submit" [disabled]="!form.valid">Sign in</button>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+  </form>
+</div>
