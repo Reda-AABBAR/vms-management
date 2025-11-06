@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import express from 'express';
-import bootstrap from './main.server';
+import bootstrap from '../dist/server/main.js';
 import { APP_BASE_HREF } from '@angular/common';
 import { REQUEST } from '@angular/core';
 import { renderApplication } from '@angular/platform-server';
