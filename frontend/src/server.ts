@@ -1,68 +1,45 @@
-import {
-  AngularNodeAppEngine,
-  createNodeRequestHandler,
-  isMainModule,
-  writeResponseToNodeResponse,
-} from '@angular/ssr/node';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
 import express from 'express';
-import { join } from 'node:path';
+import bootstrap from './main.server';
+import { APP_BASE_HREF } from '@angular/common';
+import { REQUEST } from '@angular/core';
+import { renderApplication } from '@angular/platform-server';
 
-const browserDistFolder = join(import.meta.dirname, '../browser');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DIST_FOLDER = join(__dirname, '../../dist');
+const BROWSER_FOLDER = join(DIST_FOLDER, 'browser');
+const INDEX_HTML = join(BROWSER_FOLDER, 'index.html');
 
-const app = express();
-const angularApp = new AngularNodeAppEngine();
-
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
-
-/**
- * Serve static files from /browser
- */
-app.use(
-  express.static(browserDistFolder, {
-    maxAge: '1y',
-    index: false,
-    redirect: false,
-  }),
-);
-
-/**
- * Handle all other requests by rendering the Angular application.
- */
-app.use((req, res, next) => {
-  angularApp
-    .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
-    .catch(next);
-});
-
-/**
- * Start the server if this module is the main entry point, or it is ran via PM2.
- * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
- */
-if (isMainModule(import.meta.url) || process.env['pm_id']) {
-  const port = process.env['PORT'] || 4000;
-  app.listen(port, (error) => {
-    if (error) {
-      throw error;
-    }
-
-    console.log(`Node Express server listening on http://localhost:${port}`);
-  });
+if (!existsSync(INDEX_HTML)) {
+  console.error('❌ index.html not found. Run `ng build --configuration production` first.');
+  process.exit(1);
 }
 
-/**
- * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
- */
-export const reqHandler = createNodeRequestHandler(app);
+const indexHtml = readFileSync(INDEX_HTML, 'utf-8');
+const app = express();
+
+app.use(express.static(BROWSER_FOLDER, { maxAge: '1y' }));
+
+app.get(/(.*)/, async (req, res) => {
+  try {
+    const html = await renderApplication(bootstrap, {
+      document: indexHtml,
+      url: req.url,
+      platformProviders: [
+        { provide: APP_BASE_HREF, useValue: req.baseUrl },
+        { provide: REQUEST, useValue: req },
+      ],
+    });
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (err) {
+    console.error('SSR Error:', err);
+    res.status(500).send('Server Error');
+  }
+});
+
+const port = process.env['PORT'] || 4000;
+const host = process.env['HOST'] || '0.0.0.0';
+app.listen(port,host, () => console.log(`✅ Angular SSR running at http://${host}:${port}`));

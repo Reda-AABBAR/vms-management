@@ -1,54 +1,65 @@
-
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID, Optional, REQUEST } from '@angular/core';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
-import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiBase = environment.API_BASE || (typeof window !== 'undefined' ? (window as any)['API_BASE'] : '');
-  private loginUrl = this.apiBase + '/auth/login';
-  private tokenKey = 'auth_token';
+  private ssrToken: string | null = null;
+  private user: any = null;
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
-
-  login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(this.loginUrl, { email, password }).pipe(
-      tap(response => {
-        if (response && response.token) {
-          this.setToken(response.token);
-        }
-      })
-    );
+    @Inject(PLATFORM_ID) private platformId: object,
+    @Optional() @Inject(REQUEST) private request: any
+  ) {
+    this.loadSSRtoken();
   }
 
-  setToken(token: string) {
-    if (isPlatformBrowser(this.platformId)) {
-      sessionStorage.setItem(this.tokenKey, token);
+  /** ✅ SSR: read cookie sent by Go backend */
+  private loadSSRtoken() {
+    if (isPlatformServer(this.platformId) && this.request?.headers?.cookie) {
+      const token = this.request.headers.cookie.match(/token=([^;]+)/);
+      if (token) {
+        this.ssrToken = token[1];
+      }
     }
   }
 
-  getToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) {
-      return sessionStorage.getItem(this.tokenKey);
-    }
-    return null;
-  }
-
-  logout() {
-    if (isPlatformBrowser(this.platformId)) {
-      sessionStorage.removeItem(this.tokenKey);
-    }
-    this.router.navigateByUrl('/login');
-  }
-
+  /** ✅ Universal method to check authentication */
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return !!this.ssrToken || !!this.user;
+  }
+
+  /** ✅ Login (cookie stored by backend automatically) */
+  login(email: string, password: string) {
+    return this.http.post('/api/auth/login', { email, password }, {
+      withCredentials: true
+    });
+  }
+
+  /** ✅ Load current user (browser + SSR safe) */
+  fetchUser() {
+    return this.http.get('/api/auth/me', { withCredentials: true })
+      .subscribe({
+        next: (u) => this.user = u,
+        error: () => this.user = null
+      });
+  }
+
+  /** ✅ Logout: backend clears cookie */
+  logout() {
+    this.http.post('/api/auth/logout', {}, { withCredentials: true })
+      .subscribe(() => {
+        this.ssrToken = null;
+        this.user = null;
+        this.router.navigate(['/login']);
+      });
+  }
+
+  /** ✅ Get user profile */
+  getUser() {
+    return this.user;
   }
 }

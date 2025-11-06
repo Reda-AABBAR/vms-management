@@ -29,8 +29,6 @@ export class LoginComponent {
     const { email, password } = this.form.value as { email: string; password: string };
     this.auth.login(email, password).subscribe({
       next: (res) => {
-        // Optionnel : afficher le nom d'utilisateur ou stocker l'utilisateur si besoin
-        // Exemple : this.user = res.user;
         this.router.navigateByUrl('/');
       },
       error: (err) => {
