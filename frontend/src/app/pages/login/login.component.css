@@ -1,5 +1,48 @@
-.login-wrapper { display:flex; align-items:center; justify-content:center; height:80vh; }
-.login-form { width:320px; display:flex; flex-direction:column; gap:8px; }
-input { padding:8px; font-size:14px; }
-button { padding:10px; font-size:16px; cursor:pointer; }
-.error { color:crimson; font-size:12px }
+.login-wrapper { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  min-height: 80vh;
+  padding: 1rem;
+}
+
+.login-form { 
+  width: 100%;
+  max-width: 380px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1.5rem; 
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  text-align: center;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-inputtext {
+  width: 100%;
+}
+
+:host ::ng-deep .p-button {
+  padding: 0.75rem;
+}
+
+:host ::ng-deep .p-password {
+  width: 100%;
+}
+
+:host ::ng-deep .p-password-input {
+  width: 100%;
+}
+
+:host ::ng-deep .p-message {
+  width: 100%;
+}

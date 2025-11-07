@@ -2,16 +2,68 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
     <h2>Login</h2>
 
-    <label for="email">Email</label>
-    <input id="email" formControlName="email" type="email" />
-    <div *ngIf="form.controls['email'].invalid && form.controls['email'].touched" class="error">Valid email required</div>
+    <div class="field">
+      <label for="email" class="block text-900 font-medium mb-2">Email</label>
+      <input 
+        id="email" 
+        pInputText 
+        formControlName="email" 
+        type="email" 
+        class="w-full" 
+        placeholder="Enter your email"
+        [class]="form.controls['email'].invalid && form.controls['email'].touched ? 'ng-invalid ng-dirty' : ''"
+      />
+      @if (form.controls['email'].invalid && form.controls['email'].touched) {
+        <small class="p-error block mt-1">
+          Valid email required
+        </small>
+      }
+    </div>
 
-    <label for="password">Password</label>
-    <input id="password" formControlName="password" type="password" />
-    <div *ngIf="form.controls['password'].invalid && form.controls['password'].touched" class="error">Password required</div>
+    <div class="field">
+      <label for="password" class="block text-900 font-medium mb-2">Password</label>
+      <p-password 
+        id="password" 
+        formControlName="password" 
+        [feedback]="false" 
+        [toggleMask]="true"
+        placeholder="Enter your password"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [inputStyle]="{ 'width': '100%' }"
+        [class]="form.controls['password'].invalid && form.controls['password'].touched ? 'ng-invalid ng-dirty' : ''"
+      />
+      @if (form.controls['password'].invalid && form.controls['password'].touched) {
+        <small class="p-error block mt-1">
+          Password required
+        </small>
+      }
+    </div>
 
-  <button type="submit" [disabled]="!form.valid">Sign in</button>
+    <p-button 
+      type="submit" 
+      label="Sign in" 
+      styleClass="w-full" 
+      [disabled]="!form.valid || isLoading()"
+      [loading]="isLoading()"
+    />
 
-    <div *ngIf="error" class="error">{{ error }}</div>
+    @if (error()) {
+      <p-message 
+        severity="error" 
+        [text]="error()"
+        styleClass="w-full mt-2"
+      />
+    }
+
+    @if (isLoading()) {
+      <div class="flex justify-content-center">
+        <p-progress-spinner 
+          styleClass="w-1rem h-1rem" 
+          strokeWidth="4" 
+          animationDuration=".5s"
+        />
+      </div>
+    }
   </form>
 </div>
