@@ -7,9 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:frontend": "node dist/frontend/server/server.js",
-    "build:ssr": "ng run frontend:server:production",
-    "serve:ssr": "node server.js"
+    "build:ssr": "ng build && ng run frontend:server",
+    "serve:ssr": "node server.mjs",
+    "dev:ssr": "ng run frontend:serve-ssr",
+    "prerender": "ng run frontend:prerender"
   },
   "prettier": {
     "printWidth": 100,
@@ -31,7 +32,10 @@
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
     "@angular/ssr": "^20.3.8",
+    "@primeuix/themes": "^1.2.5",
     "express": "^5.1.0",
+    "primeicons": "^7.0.0",
+    "primeng": "^20.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -46,6 +50,7 @@
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "browser-sync": "^3.0.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

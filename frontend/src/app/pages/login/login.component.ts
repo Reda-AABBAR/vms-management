@@ -11,7 +11,6 @@ import { MessageModule } from 'primeng/message';
 import { RippleModule } from 'primeng/ripple';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
-// Auth service - you'll need to create this
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -37,7 +36,7 @@ export class LoginComponent {
 
   form: FormGroup;
   isLoading = signal(false);
-  error = signal<string | null>(null);
+  error = signal<string | undefined>(undefined); // Changed from null to undefined
 
   constructor() {
     this.form = this.fb.group({
@@ -50,7 +49,7 @@ export class LoginComponent {
     if (this.form.invalid) return;
 
     this.isLoading.set(true);
-    this.error.set(null);
+    this.error.set(undefined); // Set to undefined instead of null
 
     try {
       const { email, password } = this.form.value;

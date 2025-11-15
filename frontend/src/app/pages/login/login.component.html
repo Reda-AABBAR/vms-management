@@ -48,13 +48,13 @@
       [loading]="isLoading()"
     />
 
-    @if (error()) {
-      <p-message 
-        severity="error" 
-        [text]="error()"
-        styleClass="w-full mt-2"
-      />
-    }
+    <!-- Fixed: Use *ngIf instead of @if for p-message to avoid type issues -->
+    <p-message 
+      *ngIf="error()" 
+      severity="error" 
+      [text]="error()!"
+      styleClass="w-full mt-2"
+    />
 
     @if (isLoading()) {
       <div class="flex justify-content-center">

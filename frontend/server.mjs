@@ -1,10 +1,12 @@
+
+// server.mjs - in project root
 import express from 'express';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DIST_FOLDER = join(__dirname, '../dist');
+const DIST_FOLDER = join(__dirname, 'dist');
 const BROWSER_FOLDER = join(DIST_FOLDER, 'browser');
 const SERVER_FOLDER = join(DIST_FOLDER, 'server');
 const INDEX_HTML = join(BROWSER_FOLDER, 'index.html');
@@ -22,8 +24,13 @@ app.use(express.static(BROWSER_FOLDER, { maxAge: '1y', index: false }));
 
 app.get(/.*/, async (req, res) => {
   try {
-    const { handleRequest } = await import(SERVER_BUNDLE);
-    const html = await handleRequest(req.originalUrl, indexHtml);
+    const { AppServerModule, default: bootstrap } = await import(SERVER_BUNDLE);
+
+    // Use the Angular bootstrap function
+    const html = await bootstrap(AppServerModule, {
+      document: indexHtml,
+      url: req.originalUrl
+    });
 
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
@@ -33,8 +40,7 @@ app.get(/.*/, async (req, res) => {
   }
 });
 
-const port: number = process.env['PORT'] ? parseInt(process.env['PORT'], 10) : 4000;
+const port = process.env['PORT'] ? parseInt(process.env['PORT'], 10) : 4000;
 app.listen(port, '0.0.0.0', () =>
   console.log(`✅ Angular SSR running at http://0.0.0.0:${port}`)
 );
-
