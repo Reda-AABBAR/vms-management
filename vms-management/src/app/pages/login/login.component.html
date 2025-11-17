@@ -1,73 +1,244 @@
 <div class="login-container">
-  <p-card header="Login" styleClass="login-card">
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-      <div class="field">
-        <label for="email" class="block text-900 font-medium mb-2">Email</label>
-        <input 
-          id="email"
-          type="email" 
-          pInputText 
-          formControlName="email" 
-          placeholder="Enter your email"
-          class="w-full" 
-          [ngClass]="{'ng-invalid ng-dirty': email?.invalid && email?.touched}"
-        />
-        @if (email?.invalid && email?.touched) {
-          <small class="p-error block">
-            @if (email?.errors?.['required']) {
-              <div>Email is required</div>
-            }
-            @if (email?.errors?.['email']) {
-              <div>Please enter a valid email</div>
-            }
-          </small>
-        }
-      </div>
+  <div class="login-content">
+    <!-- Left side - Image -->
+    <div class="login-image-section">
+      <img 
+        src="assets/login-bg-image.jpg" 
+        alt="Login Background" 
+        class="login-image"
+      />
+    </div>
 
-      <div class="field">
-        <label for="password" class="block text-900 font-medium mb-2">Password</label>
-        <p-password 
-          id="password"
-          formControlName="password" 
-          placeholder="Enter your password"
-          [feedback]="false" 
-          [toggleMask]="true"
-          class="w-full"
-          [ngClass]="{'ng-invalid ng-dirty': password?.invalid && password?.touched}"
-          inputStyleClass="w-full"
-        />
-        @if (password?.invalid && password?.touched) {
-          <small class="p-error block">
-            @if (password?.errors?.['required']) {
-              <div>Password is required</div>
-            }
-            @if (password?.errors?.['minlength']) {
-              <div>Password must be at least 6 characters</div>
-            }
-          </small>
-        }
-      </div>
+    <!-- Right side - Form -->
+    <div class="login-form-section">
+      @if (isLoginMode()) {
+        <!-- Login Form -->
+        <p-card header="Login" styleClass="login-card">
+          <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="login-form">
+            <div class="field">
+              <input 
+                id="email"
+                type="email" 
+                pInputText 
+                formControlName="email" 
+                placeholder="Enter your email"
+                class="w-full" 
+                [ngClass]="{'ng-invalid ng-dirty': loginEmail?.invalid && loginEmail?.touched}"
+              />
+              @if (loginEmail?.invalid && loginEmail?.touched) {
+                <small class="p-error block">
+                  @if (loginEmail?.errors?.['required']) {
+                    <div>Email is required</div>
+                  }
+                  @if (loginEmail?.errors?.['email']) {
+                    <div>Please enter a valid email</div>
+                  }
+                </small>
+              }
+            </div>
 
-      @if (errorMessage()) {
-        <p-message severity="error" text="{{errorMessage()}}"></p-message>
+            <div class="field">
+              <p-password 
+                id="password"
+                formControlName="password" 
+                placeholder="Enter your password"
+                [feedback]="false" 
+                [toggleMask]="true"
+                class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': loginPassword?.invalid && loginPassword?.touched}"
+                inputStyleClass="w-full"
+              />
+             @if (loginPassword?.invalid && loginPassword?.touched) {
+                <small class="p-error block">
+                  @if (loginPassword?.errors?.['required']) {
+                    <div>Password is required</div>
+                  }
+                  @if (loginPassword?.errors?.['minlength']) {
+                    <div>Password must be at least 6 characters</div>
+                  }
+                </small>
+              }
+            </div>
+
+            @if (errorMessage()) {
+              <p-message severity="error" text="{{errorMessage()}}"></p-message>
+            }
+
+            @if (successMessage()) {
+              <p-message severity="success" text="{{successMessage()}}"></p-message>
+            }
+
+            <button 
+              pButton 
+              pRipple 
+              class="w-full login-button" 
+              type="submit"
+              [disabled]="isLoading() || loginForm.invalid"
+            >
+              @if (isLoading()) {
+                <div class="custom-spinner"></div>
+              }
+              Login
+            </button>
+
+            <div class="text-center mt-3">
+              <span class="text-600">Don't have an account? </span>
+              <button 
+                type="button" 
+                class="p-button-link p-0" 
+                (click)="toggleMode()"
+                [disabled]="isLoading()"
+              >
+                <span class="text-primary font-medium">Register here</span>
+              </button>
+            </div>
+          </form>
+        </p-card>
+      } @else {
+        <!-- Registration Form -->
+        <p-card header="Create Account" styleClass="login-card">
+          <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="login-form">
+            <div class="field">
+              <input 
+                id="firstName"
+                type="text" 
+                pInputText 
+                formControlName="firstName" 
+                placeholder="Enter your first name"
+                class="w-full" 
+                [ngClass]="{'ng-invalid ng-dirty': registerFirstName?.invalid && registerFirstName?.touched}"
+              />
+              @if (registerFirstName?.invalid && registerFirstName?.touched) {
+                <small class="p-error block">
+                  @if (registerFirstName?.errors?.['required']) {
+                    <div>First name is required</div>
+                  }
+                </small>
+              }
+            </div>
+
+            <div class="field">
+              <input 
+                id="lastName"
+                type="text" 
+                pInputText 
+                formControlName="lastName" 
+                placeholder="Enter your last name"
+                class="w-full" 
+                [ngClass]="{'ng-invalid ng-dirty': registerLastName?.invalid && registerLastName?.touched}"
+              />
+              @if (registerLastName?.invalid && registerLastName?.touched) {
+                <small class="p-error block">
+                  @if (registerLastName?.errors?.['required']) {
+                    <div>Last name is required</div>
+                  }
+                </small>
+              }
+            </div>
+
+            <div class="field">
+              <input 
+                id="registerEmail"
+                type="email" 
+                pInputText 
+                formControlName="email" 
+                placeholder="Enter your email"
+                class="w-full" 
+                [ngClass]="{'ng-invalid ng-dirty': registerEmail?.invalid && registerEmail?.touched}"
+              />
+              @if (registerEmail?.invalid && registerEmail?.touched) {
+                <small class="p-error block">
+                  @if (registerEmail?.errors?.['required']) {
+                    <div>Email is required</div>
+                  }
+                  @if (registerEmail?.errors?.['email']) {
+                    <div>Please enter a valid email</div>
+                  }
+                </small>
+              }
+            </div>
+
+            <div class="field">
+              <p-password 
+                id="registerPassword"
+                formControlName="password" 
+                placeholder="Enter your password"
+                [feedback]="false" 
+                [toggleMask]="true"
+                class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': registerPassword?.invalid && registerPassword?.touched}"
+                inputStyleClass="w-full"
+              />
+             @if (registerPassword?.invalid && registerPassword?.touched) {
+                <small class="p-error block">
+                  @if (registerPassword?.errors?.['required']) {
+                    <div>Password is required</div>
+                  }
+                  @if (registerPassword?.errors?.['minlength']) {
+                    <div>Password must be at least 6 characters</div>
+                  }
+                </small>
+              }
+            </div>
+
+            <div class="field">
+              <p-password 
+                id="confirmPassword"
+                formControlName="confirmPassword" 
+                placeholder="Confirm your password"
+                [feedback]="false" 
+                [toggleMask]="true"
+                class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': registerConfirmPassword?.invalid && registerConfirmPassword?.touched}"
+                inputStyleClass="w-full"
+              />
+             @if (registerConfirmPassword?.invalid && registerConfirmPassword?.touched) {
+                <small class="p-error block">
+                  @if (registerConfirmPassword?.errors?.['required']) {
+                    <div>Please confirm your password</div>
+                  }
+                  @if (registerConfirmPassword?.errors?.['passwordMismatch']) {
+                    <div>Passwords do not match</div>
+                  }
+                </small>
+              }
+            </div>
+
+            @if (errorMessage()) {
+              <p-message severity="error" text="{{errorMessage()}}"></p-message>
+            }
+
+            @if (successMessage()) {
+              <p-message severity="success" text="{{successMessage()}}"></p-message>
+            }
+
+            <button 
+              pButton 
+              pRipple 
+              class="w-full login-button" 
+              type="submit"
+              [disabled]="isLoading() || registerForm.invalid"
+            >
+              @if (isLoading()) {
+                <div class="custom-spinner"></div>
+              }
+              Register
+            </button>
+
+            <div class="text-center mt-3">
+              <span class="text-600">Already have an account? </span>
+              <button 
+                type="button" 
+                class="p-button-link p-0" 
+                (click)="toggleMode()"
+                [disabled]="isLoading()"
+              >
+                <span class="text-primary font-medium">Login here</span>
+              </button>
+            </div>
+          </form>
+        </p-card>
       }
-
-      <button 
-        pButton 
-        pRipple 
-        label="Login" 
-        class="w-full" 
-        type="submit"
-        [disabled]="isLoading() || loginForm.invalid"
-      >
-        @if (isLoading()) {
-          <p-progressSpinner 
-            styleClass="w-4 h-4" 
-            strokeWidth="4"
-            animationDuration=".5s"
-          />
-        }
-      </button>
-    </form>
-  </p-card>
+    </div>
+  </div>
 </div>

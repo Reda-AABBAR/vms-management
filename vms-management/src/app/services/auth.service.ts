@@ -8,6 +8,13 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
 export interface User {
   id: number;
   username: string;
@@ -23,11 +30,19 @@ export interface LoginResponse {
   user: User;
 }
 
+export interface RegisterResponse {
+  message: string;
+  user?: User;
+  token?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = `${environment.apiHost}/auth/login`;
+  private readonly apiUrl = environment.apiHost;
+  private readonly loginUrl = `${this.apiUrl}/auth/login`;
+  private readonly registerUrl = `${this.apiUrl}/auth/register`;
 
   constructor(
     private http: HttpClient,
@@ -35,7 +50,11 @@ export class AuthService {
   ) {}
 
   login(credentials: LoginRequest) {
-    return this.http.post<LoginResponse>(this.apiUrl, credentials);
+    return this.http.post<LoginResponse>(this.loginUrl, credentials);
+  }
+
+  register(userData: RegisterRequest) {
+    return this.http.post<RegisterResponse>(this.registerUrl, userData);
   }
 
   setAuthData(token: string, user: User): void {
